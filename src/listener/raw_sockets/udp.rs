@@ -1,5 +1,4 @@
 use pnet::packet::udp::UdpPacket;
-use pnet::packet::Packet;
 use crate::listener::metrics::TrafficMetrics;
 use std::sync::Arc;
 
