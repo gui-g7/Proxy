@@ -3,7 +3,6 @@
 use std::io;
 use std::sync::Arc;
 use std::time::Duration;
-
 use pnet::datalink::{self, Channel::Ethernet, Config};
 use pnet::packet::ethernet::EthernetPacket;
 use pnet::packet::Packet;
@@ -51,7 +50,6 @@ fn low_raw_packet(packet: &EthernetPacket) {
 
 use pnet::packet::ipv4::Ipv4Packet;
 use pnet::packet::ethernet::EtherTypes;
-
 use crate::listener::metrics::TrafficMetrics;
 use crate::listener::protocols::process_ip_packet;
 
