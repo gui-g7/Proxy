@@ -2,6 +2,7 @@ use pnet::packet::udp::UdpPacket;
 use crate::listener::metrics::TrafficMetrics;
 use std::sync::Arc;
 
+#[allow(unused)]
 pub fn process_raw_udp_packet(packet: &[u8], metrics: &Arc<TrafficMetrics>) {
     if let Some(udp_packet) = UdpPacket::new(packet) {
         let src_port = udp_packet.get_source();
