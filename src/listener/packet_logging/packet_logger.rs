@@ -3,6 +3,7 @@
 use std::fs::OpenOptions;
 use std::io::Write;
 
+#[allow(unused)]
 pub fn log_packet(data: &[u8]) {
     let mut file = OpenOptions::new()
         .append(true)
