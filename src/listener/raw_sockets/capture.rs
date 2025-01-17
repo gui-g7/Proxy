@@ -48,8 +48,6 @@ pub fn capture_packets(interface_name: &str) -> io::Result<()> {
 }
 
 /// Processa um pacote Ethernet capturado.
-/// Aqui, você pode adicionar a lógica de identificação de protocolo e redirecionamento
-/// para o módulo correto (TCP, UDP, ICMP).
 fn process_packet(packet: &EthernetPacket) {
     println!("Capturado pacote: {:?}", packet);
 }
