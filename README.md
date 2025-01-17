@@ -140,6 +140,7 @@ Após o processamento, os pacotes são enviados de volta para o destinatário. E
 <br><br><br><br><br><br><br>
 
 <h1>Check-point</h1>
+<p>(Daqui para baixo as coisas estão um pouco incertas.)</p>
 
 <br><br><br><br><br><br><br>
 
