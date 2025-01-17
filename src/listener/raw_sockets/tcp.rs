@@ -1,5 +1,4 @@
 use pnet::packet::tcp::TcpPacket;
-use pnet::packet::Packet;
 use crate::listener::metrics::TrafficMetrics;
 use std::sync::Arc;
 
