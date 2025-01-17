@@ -366,3 +366,30 @@ proxy_project/
 - Proteger o proxy com uma senha.
 
 - Criar um reconhecimento de padrões binários, bloqueando malwares e usando códigos menores para representar padrões maiores, semelhante a compressão zip.
+
+<br><br><hr></hr></br></br>
+
+Resultado por enquanto:
+
+```bash
+
+=== Pacote TCP ===
+Endereço IP de Origem: 00.000.00.000
+Endereço IP de Destino: 11.1.11.111
+Porta de Origem: 432
+Porta de Destino: 34562
+Número de Sequência: 3154729458
+Número de Reconhecimento: 1794639226
+Tamanho da Janela: 82
+Tamanho do Payload: 32 bytes
+=== Pacote UDP ===
+Endereço IP de Origem: 2.2.2.2
+Endereço IP de Destino: 333.333.333.333
+Porta de Origem: 58
+Porta de Destino: 67
+Tamanho do Payload: 308 bytes
+
+
+```
+
+(exceto o tamanho dos pacotes, todos os números são ilustrativos)
