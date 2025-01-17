@@ -7,7 +7,7 @@ pub fn start_tcp_listener(addr: &str) {
     println!("Listening for TCP connections on {}", addr);
     for stream in listener.incoming() {
         match stream {
-            Ok(stream) => {
+            Ok(_stream) => {
                 println!("New TCP connection established");
                 // Processar a conexão TCP
             }
