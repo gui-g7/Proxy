@@ -1,0 +1,8 @@
+[package]
+name = "proxy"
+version = "0.1.0"
+edition = "2021"
+authors = ["Guilherme <guilhermegcardoso7@gmail.com>"]
+
+[dependencies]
+pnet = "0.35.0"
