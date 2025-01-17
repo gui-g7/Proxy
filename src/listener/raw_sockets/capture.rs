@@ -6,10 +6,16 @@ use std::time::Duration;
 use pnet::datalink::{self, Channel::Ethernet, Config};
 use pnet::packet::ethernet::EthernetPacket;
 use pnet::packet::Packet;
+use pnet::packet::ipv4::Ipv4Packet;
+use pnet::packet::ethernet::EtherTypes;
+use crate::listener::metrics::TrafficMetrics;
+use crate::listener::protocols::process_ip_packet;
+
 
 /// Função principal que captura os pacotes da interface de rede em modo raw.
 /// Essa função faz a captura de todos os pacotes e deixa o processamento
 /// para um estágio posterior, como a separação por TCP, UDP, ICMP, etc.
+#[allow(unused)]
 pub fn capture_packets(interface_name: &str, metrics: &Arc<TrafficMetrics>) -> io::Result<()> {
     // Configuração do canal Ethernet
     let interfaces = datalink::interfaces();
@@ -44,15 +50,12 @@ pub fn capture_packets(interface_name: &str, metrics: &Arc<TrafficMetrics>) -> i
 
 
 /// Processa um pacote Ethernet capturado.
+#[allow(unused)]
 fn low_raw_packet(packet: &EthernetPacket) {
     println!("Capturado pacote: {:?}", packet);
 }
 
-use pnet::packet::ipv4::Ipv4Packet;
-use pnet::packet::ethernet::EtherTypes;
-use crate::listener::metrics::TrafficMetrics;
-use crate::listener::protocols::process_ip_packet;
-
+#[allow(unused)]
 fn process_packet(packet: &EthernetPacket, metrics: &Arc<TrafficMetrics>) {
     match packet.get_ethertype() {
         EtherTypes::Ipv4 => {
@@ -67,5 +70,3 @@ fn process_packet(packet: &EthernetPacket, metrics: &Arc<TrafficMetrics>) {
         }
     }
 }
-
-
