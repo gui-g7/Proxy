@@ -144,225 +144,68 @@ Após o processamento, os pacotes são enviados de volta para o destinatário. E
 
 <br><br><br><br><br><br><br>
 
-Vamos detalhar ainda mais a primeira camada (Camada de Entrada - **Listener/Receiver**) para que você tenha uma visão clara dos módulos que deve criar e como organizar os arquivos no seu projeto Cargo. Para isso, vamos quebrar a funcionalidade de captura de pacotes em submódulos menores, que cuidam de diferentes aspectos da captura e gerenciamento das conexões.
-
-### 1. **Divisão da Primeira Camada (Listener/Receiver) em Módulos**
-A camada de entrada pode ser dividida em vários subcomponentes/módulos que desempenham tarefas específicas. Vamos criar um diretório para cada módulo, e cada diretório conterá arquivos responsáveis por funções individuais.
-
-#### **Módulos e Arquivos:**
-1. **Raw Sockets**: Responsável pela captura de pacotes em nível mais baixo, com suporte a diferentes protocolos.
-   - Arquivos:
-     - `mod.rs`: Ponto de entrada para o módulo.
-     - `tcp.rs`: Implementação da captura de pacotes TCP.
-     - `udp.rs`: Implementação da captura de pacotes UDP.
-     - `icmp.rs`: Implementação da captura de pacotes ICMP (se necessário).
-   
-2. **Socket Listener**: Implementa os listeners para diferentes portas e protocolos.
-   - Arquivos:
-     - `mod.rs`: Ponto de entrada para o módulo.
-     - `tcp_listener.rs`: Listener para conexões TCP.
-     - `udp_listener.rs`: Listener para conexões UDP.
-
-3. **Gerenciamento de Conexões**: Trata timeouts e a verificação de conexões ativas.
-   - Arquivos:
-     - `mod.rs`: Ponto de entrada para o módulo.
-     - `timeout.rs`: Implementação de timeout para conexões inativas.
-     - `connection_manager.rs`: Gerencia o status das conexões ativas.
-
-4. **Log de Pacotes**: Módulo responsável por logar os pacotes recebidos para fins de monitoramento e auditoria.
-   - Arquivos:
-     - `mod.rs`: Ponto de entrada para o módulo.
-     - `packet_logger.rs`: Funções para logar pacotes capturados (pode ser configurado para armazenar em arquivos, banco de dados, etc.).
-
-#### **Estrutura do Diretório Cargo**
-Aqui está como o diretório do seu projeto poderia ser organizado com base nesses módulos e arquivos:
-
 ```plaintext
 proxy_project/
 │
 ├── Cargo.toml
-├── src/
-│   ├── main.rs
-│   ├── listener/
-│   │   ├── raw_sockets/
-│   │   │   ├── mod.rs
-│   │   │   ├── tcp.rs
-│   │   │   ├── udp.rs
-│   │   │   ├── icmp.rs
-│   │   ├── socket_listener/
-│   │   │   ├── mod.rs
-│   │   │   ├── tcp_listener.rs
-│   │   │   ├── udp_listener.rs
-│   │   ├── connection_management/
-│   │   │   ├── mod.rs
-│   │   │   ├── timeout.rs
-│   │   │   ├── connection_manager.rs
-│   │   ├── packet_logging/
-│   │       ├── mod.rs
-│   │       ├── packet_logger.rs
-│   ├── lib.rs
 │
-```
-
-### 2. **Descrição dos Módulos e Arquivos**
-
-#### **1. Raw Sockets**
-Esse módulo será responsável por capturar pacotes em nível bruto, permitindo acessar diretamente os dados da rede. Ele terá suporte para diferentes tipos de pacotes (TCP, UDP, ICMP).
-
-- **Arquivos**:
-  - **mod.rs**: Ponto de entrada do módulo. Importa e expõe as funções dos arquivos `tcp.rs`, `udp.rs`, e `icmp.rs`.
-  - **tcp.rs**: Funções para capturar pacotes TCP usando raw sockets.
-  - **udp.rs**: Funções para capturar pacotes UDP.
-  - **icmp.rs**: Captura pacotes ICMP, útil para monitoramento de ping ou outros diagnósticos.
-
-```rust
-// src/listener/raw_sockets/mod.rs
-pub mod tcp;
-pub mod udp;
-pub mod icmp;
-```
-
-- **tcp.rs**:
-```rust
-use std::net::{IpAddr, TcpListener, TcpStream};
-
-pub fn capture_tcp_packets(ip: IpAddr, port: u16) {
-    let listener = TcpListener::bind((ip, port)).expect("Failed to bind TCP listener");
-    for stream in listener.incoming() {
-        match stream {
-            Ok(stream) => handle_tcp_connection(stream),
-            Err(e) => eprintln!("Error in TCP connection: {}", e),
-        }
-    }
-}
-
-fn handle_tcp_connection(mut stream: TcpStream) {
-    // Manipula os pacotes recebidos via TCP
-}
-```
-
-#### **2. Socket Listener**
-Este módulo gerencia os listeners para TCP e UDP. Ele escuta em portas específicas e delega a captura de pacotes para funções específicas.
-
-- **Arquivos**:
-  - **mod.rs**: Ponto de entrada do módulo. Importa `tcp_listener.rs` e `udp_listener.rs`.
-  - **tcp_listener.rs**: Funções para escutar conexões TCP em portas específicas.
-  - **udp_listener.rs**: Funções para escutar conexões UDP.
-
-```rust
-// src/listener/socket_listener/mod.rs
-pub mod tcp_listener;
-pub mod udp_listener;
-```
-
-- **tcp_listener.rs**:
-```rust
-use std::net::TcpListener;
-
-pub fn start_tcp_listener(addr: &str) {
-    let listener = TcpListener::bind(addr).expect("Failed to bind to address");
-    println!("Listening for TCP connections on {}", addr);
-    for stream in listener.incoming() {
-        match stream {
-            Ok(stream) => {
-                println!("New TCP connection established");
-                // Processar a conexão TCP
-            }
-            Err(e) => eprintln!("Error: {}", e),
-        }
-    }
-}
-```
-
-#### **3. Gerenciamento de Conexões**
-Esse módulo lida com o gerenciamento de conexões ativas e timeouts. Ele verifica quais conexões estão ativas e cuida do encerramento de conexões inativas.
-
-- **Arquivos**:
-  - **mod.rs**: Ponto de entrada do módulo. Importa `timeout.rs` e `connection_manager.rs`.
-  - **timeout.rs**: Implementa a lógica de timeout para conexões.
-  - **connection_manager.rs**: Mantém o estado das conexões e gerencia seu ciclo de vida.
-
-```rust
-// src/listener/connection_management/mod.rs
-pub mod timeout;
-pub mod connection_manager;
-```
-
-- **timeout.rs**:
-```rust
-use std::time::Duration;
-
-pub fn check_timeout(last_activity: Duration, timeout_limit: Duration) -> bool {
-    last_activity > timeout_limit
-}
-```
-
-#### **4. Log de Pacotes**
-Este módulo é responsável por logar os pacotes recebidos, o que ajuda no monitoramento e na auditoria. Ele pode logar pacotes em arquivos ou sistemas de logging mais complexos.
-
-- **Arquivos**:
-  - **mod.rs**: Ponto de entrada do módulo. Importa `packet_logger.rs`.
-  - **packet_logger.rs**: Implementa as funções de log para os pacotes capturados.
-
-```rust
-// src/listener/packet_logging/mod.rs
-pub mod packet_logger;
-```
-
-- **packet_logger.rs**:
-```rust
-use std::fs::OpenOptions;
-use std::io::Write;
-
-pub fn log_packet(data: &[u8]) {
-    let mut file = OpenOptions::new()
-        .append(true)
-        .create(true)
-        .open("packet_logs.txt")
-        .expect("Unable to open log file");
-
-    writeln!(file, "{:?}", data).expect("Unable to write to log file");
-}
-```
-
-### 3. **Como fica o Diretório no Projeto Cargo**
-
-Aqui está uma visualização mais detalhada do diretório `src` com base nos módulos e arquivos descritos:
-
-```plaintext
-proxy_project/
+├── db/                                   # Banco de dados.
+│   ├── dns.db                            # DNS em SQL.
+│   └── package.rdb                       # Dados de uso, armazenados em Redis.
 │
-├── Cargo.toml
 └── src/
-    ├── main.rs             # Arquivo principal que inicializa o proxy.
+    ├── main.rs                           # Arquivo principal que inicializa o proxy.
     │
-    ├── listener/           # Diretório para a camada de entrada.
-    │   ├── raw_sockets/    # Módulo de captura de pacotes brutos.
-    │   │   ├── mod.rs      # Ponto de entrada para o módulo de raw sockets.
-    │   │   ├── tcp.rs      # Captura de pacotes TCP.
-    │   │   ├── udp.rs      # Captura de pacotes UDP.
-    │   │   └── icmp.rs     # Captura de pacotes ICMP.
+    ├── listener/                         # Diretório para a camada de entrada.
+    │   ├── raw_sockets/                  # Módulo de captura de pacotes brutos.
+    │   │   ├── mod.rs                    # Ponto de entrada para o módulo de raw sockets.
+    │   │   ├── tcp.rs                    # Captura de pacotes TCP.
+    │   │   ├── udp.rs                    # Captura de pacotes UDP.
+    │   │   └── icmp.rs                   # Captura de pacotes ICMP.
     │   │
-    │   ├── socket_listener/# Módulo de listeners de sockets.
-    │   │   ├── mod.rs      # Ponto de entrada para o módulo de listeners.
-    │   │   ├── tcp_listener.rs  # Listener para conexões TCP.
-    │   │   └── udp_listener.rs  # Listener para conexões UDP.
+    │   ├── socket_listener/              # Módulo de listeners de sockets.
+    │   │   ├── mod.rs                    # Ponto de entrada para o módulo de listeners.
+    │   │   ├── tcp_listener.rs           # Listener para conexões TCP.
+    │   │   └── udp_listener.rs           # Listener para conexões UDP.
     │   │
-    │   ├── connection_management/ # Módulo de gerenciamento de conexões.
-    │   │   ├── mod.rs       # Ponto de entrada para o gerenciamento de conexões.
-    │   │   ├── timeout.rs   # Implementação de timeouts para conexões.
-    │   │   └── connection_manager.rs  # Gerenciamento do ciclo de vida das conexões.
+    │   ├── connection_management/        # Módulo de gerenciamento de conexões.
+    │   │   ├── mod.rs                    # Ponto de entrada para o gerenciamento de conexões.
+    │   │   ├── timeout.rs                # Implementação de timeouts para conexões.
+    │   │   └── connection_manager.rs     # Gerenciamento do ciclo de vida das conexões.
     │   │
-    │   └── packet_logging/  # Módulo de logging de pacotes.
-    │       ├── mod.rs       # Ponto de entrada para o módulo de logging.
-    │       └── packet_logger.rs  # Funções para log de pacotes.
+    │   ├── packet_logging/               # Módulo de logging de pacotes.
+    │   │   ├── mod.rs                    # Ponto de entrada para o módulo de logging.
+    │   │   └── packet_logger.rs          # Funções para log de pacotes.
+    │   │
+    │   ├── mtrics/                       # Módulo de métricas.
+    │   │   ├── mod.rs                    # Ponto de entrada para o módulo de métricas.
+    │   │   └── traffic_metrics.rs        # Funções para calculo de métricas.
+    │   │
+    │   └── data/                         # Módulo de conexão com o banco de dados.
+    │       ├── mod.rs                    # Ponto de entrada para o módulo de dados.
+    │       │.
+    │       ├── dns/                      # Módulo de conexão com a DNS em SQL
+    │       │   ├── mod.rs                # Ponto de entrada para o módulo da DNS.
+    │       │   └── sql.rs                # Funções de acesso a DNS.
+    │       │
+    │       └── redis                     # Módulo de conexão com o banco de dados dos pacotes
+    │           ├── mod.rs                # Ponto de entrada para o módulo do banco de dados.
+    │           └── redis.rs              # Funções de acesso ao banco de dados.
     │
-    └── lib.rs               # Biblioteca geral do projeto.
+    └── lib.rs                            # Biblioteca geral do projeto.
 ```
 
-## 4. **Proxymos passos**
+## **Atualmente trabalhando em:**
 
-- Criar uma DNS própria, para cada pacote os IPs serão pesquisados numa database, caso não encontrados, serão pesquisados numa API e salvos, o IP e de onde é.
+- API para identificação dos dominios dos IPs.
+
+- DNS particular para armazenamento dos dominios e IPs.
+
+- Banco de dados em Redis com informações de todos os pacotes.
+
+- Implementação dos módulos redundantes até agora.
+
+## **Proxymos passos:**
 
 - Proteger o proxy com uma senha.
 
