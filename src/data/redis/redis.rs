@@ -19,9 +19,7 @@ impl RedisDB {
     pub fn store_packet(&self, protocol: &str, data: &str) -> RedisResult<()> {
         let mut conn = self.conn.lock().unwrap();
         let key = format!("packet:{}", protocol);
-        
-        let _: i64 = conn.lpush(key, data)?; // Explicitamos o tipo esperado
-        
+        let _: i64 = conn.lpush(key, data)?;
         Ok(())
     }    
 }
