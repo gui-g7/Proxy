@@ -14,7 +14,7 @@ pub enum ReverseIpError {
 
 #[derive(Debug, Clone)]
 pub struct ApiConfig {
-    hackertarget_url: String,
+    ip_api_url: String,
     #[allow(unused)]
     viewdns_api_key: String,
 }
@@ -22,15 +22,15 @@ pub struct ApiConfig {
 impl Default for ApiConfig {
     fn default() -> Self {
         Self {
-            hackertarget_url: "https://api.hackertarget.com/reverseiplookup/?q=".to_string(),
-            viewdns_api_key: "SUA_CHAVE_AQUI".to_string(),
+            ip_api_url: "https://ip-api.com/json/".to_string(),
+            viewdns_api_key: "".to_string(),
         }
     }
 }
 
 impl ApiConfig {
-    pub fn hackertarget_lookup(&self, ip: &str) -> Result<Vec<String>, ReverseIpError> {
-        let url = format!("{}{}", self.hackertarget_url, ip);
+    pub fn ip_api_lookup(&self, ip: &str) -> Result<Vec<String>, ReverseIpError> {
+        let url = format!("{}{}", self.ip_api_url, ip);
         let response = blocking::get(&url)?.text()?;
 
         if response.contains("API count exceeded") {
