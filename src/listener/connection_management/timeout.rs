@@ -1,5 +1,3 @@
-// Implementação de timeouts para conexões.
-
 use std::time::Duration;
 
 #[allow(unused)]
